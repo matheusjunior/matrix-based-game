@@ -17,42 +17,51 @@
 
 class Sprite {
 
-	public:
+public:
 
-       Physics phi;
+	Physics phi;
 
-	    int x,y,_alpha,_sx,_sy,_cx,_cy;
+	SDL_Renderer* _gRenderer;
 
-		float ax0,  ay0,  ax1,  ay1,  ax2,  ay2,  ax3,  ay3;
+	int x, y, _alpha, _sx, _sy, _cx, _cy;
 
-		SDL_Texture *_Texture;
+	float ax0, ay0, ax1, ay1, ax2, ay2, ax3, ay3;
 
-		int _Width, _Height, _frame, _nframes;
-		
-		float _step = 1;
+	SDL_Texture *_Texture;
 
-		void setStep (int n) {_step = n;};
-		
-		Sprite() {_Texture = NULL; _Width = 0; _Height = 0;};
+	int _Width, _Height, _frame, _nframes;
 
-		~Sprite() {free();};
+	float _step = 1;
 
-		bool loadFromFile (std::string, int);
-		void free();
+	void setStep(int n) { _step = n; };
 
-		void setColor (Uint8 red, Uint8 green, Uint8 blue){
-		   SDL_SetTextureColorMod (_Texture, red, green, blue);
-		};
-		void setBlendMode (SDL_BlendMode blending) {
-           SDL_SetTextureBlendMode (_Texture, blending);
-		}
-		void setAlpha (Uint8 alpha) {
-           SDL_SetTextureAlphaMod (_Texture, alpha);
-        }
-		
-		void render ();
-		
-		void jump ();
+	Sprite() { _Texture = NULL; _Width = 0; _Height = 0; };
+
+	Sprite(SDL_Renderer *rend) { 
+		_Texture = NULL; 
+		_Width = 0; 
+		_Height = 0; 
+	    _gRenderer = rend; 
+	};
+	
+	~Sprite() { free(); };
+
+	bool loadFromFile(std::string, int);
+	void free();
+
+	void setColor(Uint8 red, Uint8 green, Uint8 blue){
+		SDL_SetTextureColorMod(_Texture, red, green, blue);
+	};
+	void setBlendMode(SDL_BlendMode blending) {
+		SDL_SetTextureBlendMode(_Texture, blending);
+	}
+	void setAlpha(Uint8 alpha) {
+		SDL_SetTextureAlphaMod(_Texture, alpha);
+	}
+
+	void render();
+
+	void jump();
 };
 
 

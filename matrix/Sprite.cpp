@@ -4,8 +4,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
-#include <SDL_mixer.h>
-
 
 #else
 
@@ -16,6 +14,8 @@
 #endif
 
 #include <string>
+#include <stdio.h>
+#include <iostream>
 
 #include "Sprite.h"
 #include "Consts.h"
@@ -49,7 +49,7 @@ bool Sprite::loadFromFile (std::string path, int n) {
 	SDL_Surface *loadedSurface = IMG_Load (path.c_str());
 	if (loadedSurface == NULL) {
 		printf ("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-		exit (0);
+		return false;
 	}
 
 	    //Color key image
@@ -62,11 +62,11 @@ bool Sprite::loadFromFile (std::string path, int n) {
 	
 //	SDL_SetColorKey (loadedSurface, SDL_TRUE, SDL_MapRGB (loadedSurface->format, 0, 0xFF, 0xFF));
 
-	newTexture = SDL_CreateTextureFromSurface (gRenderer, loadedSurface);
+	newTexture = SDL_CreateTextureFromSurface (_gRenderer, loadedSurface);
 
 	if (newTexture == NULL) {
 		printf ("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-		exit (0);
+		return false;
 	}
 
 	//Get image dimensions
@@ -91,13 +91,17 @@ void Sprite::free() {
 	}
 }
 
-void Sprite::render () {
+void Sprite::render() {
 
 	SDL_Rect renderQuad = { x*PASSO, y*PASSO, _Width, _Height};	
 
 	++_frame;
 	if ((_frame/_step) == _nframes) _frame = 0;
 	
-	SDL_RenderCopyEx (gRenderer, _Texture, NULL, &renderQuad, _alpha*57, NULL, SDL_FLIP_NONE);
+	if (_gRenderer == NULL) {
+		std::cout << "erro";
+	}
+
+	SDL_RenderCopyEx (_gRenderer, _Texture, NULL, &renderQuad, _alpha*57, NULL, SDL_FLIP_NONE);
 	
 }
