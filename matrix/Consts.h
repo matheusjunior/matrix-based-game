@@ -23,5 +23,8 @@
 #define PORTAL			1
 #define NADA_AINDA		2
 #define PAREDE			3
+#define RATOEIRA        4
+#define POISON          5
+#define CENOURA         6
 
 #endif // consts

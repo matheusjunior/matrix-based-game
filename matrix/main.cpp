@@ -31,8 +31,7 @@
 #include "Nivel.h"
 #include "Physics.h"
 #include "Sprite.h"
-
-
+#include <unistd.h>
 
 SDL_Window   *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -68,7 +67,7 @@ bool init()
         return false;
     }
 
-    if (IMG_Init(IMG_INIT_JPG) == 0)
+    if (IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG) == 0)
     {
         std::cout << IMG_GetError() << endl;
         return false;
@@ -99,19 +98,24 @@ int main(int argc, char *args[])
 {
     srand(time(NULL));
 
-    char cCurrentPath[FILENAME_MAX];
+    char currentPath[FILENAME_MAX];
 	int colorG = 0;
 	bool colorGNeg = false;
 	int contadorGeral = 0;
 
-    if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath)))
+#ifdef _WIN32
+    if (!GetCurrentDir(currentPath, sizeof(currentPath)))
     {
         return errno;
     }
-
-    cCurrentPath[sizeof(cCurrentPath)-1] = '\0'; /* not really required */
-
-    printf("The current working directory is %s", cCurrentPath);
+    currentPath[sizeof(currentPath)-1] = '\0'; /* not really required */
+#else
+    if (getcwd((char *) &currentPath, sizeof(currentPath)) == NULL)
+    {
+        cout << "Error while getting current dir" << endl;
+    }
+#endif
+    printf("The current working directory is %s\n", currentPath);
 
     int a = 0;
     int i, j;
@@ -119,26 +123,32 @@ int main(int argc, char *args[])
 	bool wasInThePortal = false;
 
     SDL_Event event;
-
     const Uint8 *keyboard_state;
-
 
 	if (!init()) exit(1);
 
-	Nivel gNivel(gRenderer);
+    Nivel gNivel(gRenderer);
 	Sprite gPlayer(gRenderer);
+    Sprite dullEnemy(gRenderer);
 	
     srand(time(NULL));
 	if (!gPlayer.loadFromFile("media/ship.png", 1)) {
 		exit(0);
 	}
+    if (!dullEnemy.loadFromFile("media/dinosaur.png", 1)) {
+        exit(0);
+    }
+    dullEnemy._Height = 50;
+    dullEnemy._Width = 50;
 
     gPlayer.setStep(1);
-
+    dullEnemy.setStep(1);
     gNivel.carregar("media/map1.txt");
 
     gPlayer.x = 0;
     gPlayer.y = 0;
+    dullEnemy.x = 0;
+    dullEnemy.y = 0;
 
     int oldx, oldy, ifx, ify;
 
@@ -146,18 +156,14 @@ int main(int argc, char *args[])
     ify = 0;
 
     while (true) {
-
 		if (currentLevel == 0 && wasInThePortal) {
 			gNivel.carregar("media/map2.txt");
 			currentLevel = 1;
 		}
-
         oldx = gPlayer.x;
         oldy = gPlayer.y;
 
-
         while (SDL_PollEvent(&event)){
-
             if (event.type == SDL_KEYDOWN)		{
                 switch (event.key.keysym.sym){
                     case SDLK_RIGHT: 
@@ -177,19 +183,15 @@ int main(int argc, char *args[])
                 ;//sem mouse nesse jogo (ou com?)
             }
         }
-
-
+        dullEnemy.moveRandom();
 		if (gPlayer.y == LIMX) {
 			++ify;
 			gPlayer.y = LIMX - 1;
 		}
-
 		if (gPlayer.y < 0) {
 			--ify;
 			gPlayer.y = 0;
 		}
-
-
         if (gPlayer.x == LIMX) {
             ++ifx;
             gPlayer.x = LIMX - 1;
@@ -202,15 +204,27 @@ int main(int argc, char *args[])
 
         // onde fomos parar?
         switch (gNivel. matriz[gPlayer.y + ify][gPlayer.x + ifx]) {
-			case PORTAL: gPlayer.x = 0; gPlayer.y = 0; wasInThePortal = true; break;
-            case PAREDE: gPlayer.x = oldx; gPlayer.y = oldy; break;
+        case PORTAL: gPlayer.x = 0; gPlayer.y = 0; wasInThePortal = true; break;
+        case PAREDE: gPlayer.x = oldx; gPlayer.y = oldy; break;
+        case RATOEIRA:
+            gPlayer.lifes--;
+            gNivel.matriz[gPlayer.y + ifx][gPlayer.x + ifx] = VAZIO;
+            if (gPlayer.lifes == 0) exit(0);
+        case CENOURA:
+            gPlayer.lifes++;
+            gNivel.matriz[gPlayer.y + ifx][gPlayer.x + ifx] = VAZIO;
+        case POISON:
+            gPlayer.intoxication += 0.35;
+            if (gPlayer.intoxication >= 1) {
+                gPlayer.lifes--;
+                gPlayer.intoxication = 0;
+                if (gPlayer.lifes == 0) exit(0);
+            }
+            gNivel.matriz[gPlayer.y + ifx][gPlayer.x + ifx] = VAZIO;
         }
 
-
 		contadorGeral++;
-		std::cout << "frames "<< contadorGeral << endl;
-
-
+//		std::cout << "frames "<< contadorGeral << endl;
         // inimigos.Exec_Maquina_Estados ();
 
 
@@ -236,6 +250,7 @@ int main(int argc, char *args[])
 
 		gNivel.render(ifx);
 		gPlayer.render();
+        dullEnemy.render();
 
         SDL_RenderPresent(gRenderer);
         //------------------------------

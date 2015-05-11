@@ -5,10 +5,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#ifdef _WIN32
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
-
+#else
+#include <SDL2/SDL.h>
+#include <SDL2_ttf/SDL_ttf.h>
+#include <SDL2_image/SDL_image.h>
+#endif
 #include <iostream>
 #include <stdio.h>
 
@@ -60,7 +65,7 @@ public:
 		while (!feof(arq)) {
 
 			fgets(s, 100, arq);
-			std::cout << count++ << " " << s << std::endl;
+//			std::cout << count++ << " " << s << std::endl;
 
 			char *p = s;
 			idx = 0;
@@ -69,9 +74,11 @@ public:
 					case '~': matriz[idy][idx] = VAZIO; break;
 					case 'X': matriz[idy][idx] = PAREDE; break;
 					case '*': matriz[idy][idx] = PORTAL; break;
+					case 'R': matriz[idy][idx] = RATOEIRA; break;
+                    case 'P': matriz[idy][idx] = POISON; break;
+                    case 'C': matriz[idy][idx] = CENOURA; break;
 					default: matriz[idy][idx] = VAZIO; break;
 				}
-
 				++idx;
 				++p;
 			}
@@ -92,19 +99,15 @@ public:
 	}
 
 	void render(int ifx) {
-
 		int x, y;
 
 		if ((ifx < 0) || (ifx + LIMX >= DIMX)) {
 			puts("algo errado em sua logica");
 			exit(0);
 		}
-
-
 		if (colorG == 255) {
 			colorGNeg = true;
 		}
-
 		if (colorGNeg) {
 			colorG--;
 			if (colorG == 150) {
@@ -115,7 +118,9 @@ public:
 			colorG++;
 		}
 
-
+        SDL_Surface *surface;
+        SDL_Texture *texture;
+        bool isSprite = false;
 		for (x = 0 + ifx; x < LIMX + ifx; x++) {
 			for (y = 0; y < DIMY; y++) {
 				switch (matriz[y][x]) {
@@ -123,11 +128,27 @@ public:
 					case PORTAL: SDL_SetRenderDrawColor(_gRenderer, 0, colorG, 0, 255); break;
 					case 2: SDL_SetRenderDrawColor(_gRenderer, 50, 250, 60, 255); break;
 					case PAREDE: SDL_SetRenderDrawColor(_gRenderer, 0, 0, 0, 255); break;
+					case RATOEIRA:
+                        surface = IMG_Load("media/ratoeira.jpg");
+                        texture = SDL_CreateTextureFromSurface(_gRenderer, surface);
+                        isSprite = true;
+                        break;
+                    case POISON:
+                        surface = IMG_Load("media/poison.png");
+                        texture = SDL_CreateTextureFromSurface(_gRenderer, surface);
+                        isSprite = true;
+                        break;
+                    case CENOURA:
+                        surface = IMG_Load("media/cenoura.png");
+                        texture = SDL_CreateTextureFromSurface(_gRenderer, surface);
+                        isSprite = true;
+                        break;
 				}
 				rect.x = (x - ifx)*PASSO;
 				rect.y = y*PASSO;
-				SDL_RenderFillRect(_gRenderer, &rect);
-
+				if (isSprite) SDL_RenderCopy(_gRenderer, texture, NULL, &rect);
+                else SDL_RenderFillRect(_gRenderer, &rect);
+                isSprite = false;
 			}
 		}
 	};

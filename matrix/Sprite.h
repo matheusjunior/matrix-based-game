@@ -16,32 +16,26 @@
 #include "Physics.h"
 
 class Sprite {
-
 public:
-
+    uint16_t lifes;
+    float intoxication;
 	Physics phi;
-
 	SDL_Renderer* _gRenderer;
-
 	int x, y, _alpha, _sx, _sy, _cx, _cy;
-
 	float ax0, ay0, ax1, ay1, ax2, ay2, ax3, ay3;
-
 	SDL_Texture *_Texture;
-
 	int _Width, _Height, _frame, _nframes;
-
 	float _step = 1;
-
 	void setStep(int n) { _step = n; };
 
-	Sprite() { _Texture = NULL; _Width = 0; _Height = 0; };
+	Sprite() { _Texture = NULL; _Width = 0; _Height = 0; lifes = 1;};
 
 	Sprite(SDL_Renderer *rend) { 
 		_Texture = NULL; 
 		_Width = 0; 
 		_Height = 0; 
-	    _gRenderer = rend; 
+	    _gRenderer = rend;
+        lifes = 1;
 	};
 	
 	~Sprite() { free(); };
@@ -60,6 +54,8 @@ public:
 	}
 
 	void render();
+
+    void moveRandom();
 
 	void jump();
 };
