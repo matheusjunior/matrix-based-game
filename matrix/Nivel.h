@@ -135,7 +135,7 @@ public:
 			colorG++;
 		}
 
-		SDL_Surface *surface;
+
 		SDL_Texture *texture = NULL;
 		bool isSprite = false;
 

@@ -6,6 +6,7 @@
 #define MENU_UP			 1
 #define MENU_DOWN       -1
 #define PASSO			50 
+#define FPS				5
 
 // tamanho matriz horizontal
 #define DIMX			25

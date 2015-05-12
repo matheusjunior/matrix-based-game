@@ -109,14 +109,23 @@ int main(int argc, char *args[])
 	SDL_Event event;
 	const Uint8 *keyboard_state;
 
-	Text score;
+	Text tScore;
+	Text tFrames;
+	Text tLifes;
+
+	int lastFrameTime = 0;
+	int  currentFrameTime = 0;
+	int fpsMili = 1000 / FPS;
+	int currentSpeed = FPS;
+	int totalFrames = 0;
+	float deltaTime;
 
 	if (!init()) exit(1);
 
 	Nivel gNivel(gRenderer);
 	Sprite gPlayer(gRenderer);
 	Sprite dullEnemy(gRenderer);
-	SDL_Color white;
+	SDL_Color colorBlue;
 
 #ifdef _WIN32
 	if (!GetCurrentDir(currentPath, sizeof(currentPath)))
@@ -132,27 +141,28 @@ int main(int argc, char *args[])
 #endif
 	printf("The current working directory is %s\n", currentPath);
 
-	score.font = TTF_OpenFont("media/emulogic.ttf", 20);
+	tScore.font = TTF_OpenFont("media/emulogic.ttf", 20);
+	tFrames.font = TTF_OpenFont("media/emulogic.ttf", 20);
+	tLifes.font = TTF_OpenFont("media/emulogic.ttf", 20);
 
-	white.r = 40;
-	white.g = 40;
-	white.b = 255;
+	colorBlue.r = 40;
+	colorBlue.g = 40;
+	colorBlue.b = 255;
 
-	score.color = white;
-	score.rect.x = SIZEX - 60;
-	score.rect.y = 20;
-	score.rect.w = 80;
-	score.rect.h = 25;
-	score.displayText = "Test";
+	tScore.color = colorBlue;
+	tScore.rect.x = SIZEX - 60;
+	tScore.rect.y = 20;
+	tScore.rect.w = 80;
+	tScore.rect.h = 25;
+	tScore.displayText = "Test";
 
-	cout << score.font;
+	cout << tScore.font;
 
-	if (score.font == NULL)
+	if (tScore.font == NULL || tFrames.font == NULL)
 	{
 		std::cout << "Error: font " << TTF_GetError() << endl;
 		return -1;
 	}
-
 
 
 	srand(time(NULL));
@@ -224,6 +234,13 @@ int main(int argc, char *args[])
 			}
 		}
 
+		currentFrameTime = SDL_GetTicks();
+		deltaTime = (float)(currentFrameTime - lastFrameTime) / 1000;
+		lastFrameTime = SDL_GetTicks();
+
+		totalFrames++;
+		SDL_RenderClear(gRenderer);
+
 		dullEnemy.moveRandom();
 
 		while (!dullEnemy.isValidMove(gNivel.matriz)) {
@@ -254,6 +271,12 @@ int main(int argc, char *args[])
 		}
 
 		// onde fomos parar?
+
+		if (gPlayer.x + ifx >= DIMX - 1) {
+			gPlayer.x = gPlayer.previousX;
+			ifx--;
+		}
+
 		switch (gNivel.matriz[gPlayer.y + ify][gPlayer.x + ifx]) {
 		case PORTAL: gPlayer.x = 0; gPlayer.y = 0; wasInThePortal = true; break;
 		case PAREDE: gPlayer.x = gPlayer.previousX; gPlayer.y = gPlayer.previousY; break;
@@ -275,7 +298,17 @@ int main(int argc, char *args[])
 		}
 
 		contadorGeral++;
-		//		std::cout << "frames "<< contadorGeral << endl;
+
+		std::stringstream cont;
+		cont << contadorGeral;
+
+		tFrames.displayText = "Frames: " + cont.str();
+
+		std::stringstream lifesSTR;
+		lifesSTR << gPlayer.lifes;
+
+		tLifes.displayText = "Lifes: " + lifesSTR.str();
+		//		std::cout << "tFrames "<< contadorGeral << endl;
 		// inimigos.Exec_Maquina_Estados ();
 
 
@@ -296,29 +329,60 @@ int main(int argc, char *args[])
 			colorG++;
 		}
 
-		if (score.font == NULL) {
-			score.font = TTF_OpenFont("media/emulogic.ttf", 20);
-			score.displayText = "hello";
-			score.color = white;
-			score.rect.x = SIZEX;
-			score.rect.y = 20;
-			score.rect.w = 80;
-			score.rect.h = 25;
+		if (tScore.font == NULL) {
+			tScore.font = TTF_OpenFont("media/emulogic.ttf", 20);
+			tScore.displayText = "hello";
+			tScore.color = colorBlue;
+			tScore.rect.x = SIZEX;
+			tScore.rect.y = 20;
+			tScore.rect.w = 80;
+			tScore.rect.h = 25;
 		}
 
+		if (tFrames.font == NULL) {
+			tFrames.font = TTF_OpenFont("media/emulogic.ttf", 20);
+			tFrames.displayText = "Frames: ";
+			tFrames.color = colorBlue;
+			tFrames.rect.x = SIZEX;
+			tFrames.rect.y = 50;
+			tFrames.rect.w = 150;
+			tFrames.rect.h = 25;
+		}
 
-		score.surface = TTF_RenderText_Solid(score.font, score.displayText.c_str(), white);
-		score.texture = SDL_CreateTextureFromSurface(gRenderer, score.surface);
+		if (tLifes.font == NULL) {
+			tLifes.font = TTF_OpenFont("media/emulogic.ttf", 20);
+			tLifes.displayText = "Lifes: ";
+			tLifes.color = colorBlue;
+			tLifes.rect.x = SIZEX;
+			tLifes.rect.y = 80;
+			tLifes.rect.w = 150;
+			tLifes.rect.h = 25;
+		}
+
+		tScore.surface = TTF_RenderText_Solid(tScore.font, tScore.displayText.c_str(), colorBlue);
+		tScore.texture = SDL_CreateTextureFromSurface(gRenderer, tScore.surface);
+
+		tFrames.surface = TTF_RenderText_Solid(tFrames.font, tFrames.displayText.c_str(), colorBlue);
+		tFrames.texture = SDL_CreateTextureFromSurface(gRenderer, tFrames.surface);
+
+		tLifes.surface = TTF_RenderText_Solid(tLifes.font, tLifes.displayText.c_str(), colorBlue);
+		tLifes.texture = SDL_CreateTextureFromSurface(gRenderer, tLifes.surface);
 
 		SDL_SetRenderDrawColor(gRenderer, colorG, colorG, colorG, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		SDL_RenderCopy(gRenderer, score.texture, NULL, &score.rect);
+		SDL_RenderCopy(gRenderer, tScore.texture, NULL, &tScore.rect);
+		SDL_RenderCopy(gRenderer, tFrames.texture, NULL, &tFrames.rect);
+		SDL_RenderCopy(gRenderer, tLifes.texture, NULL, &tLifes.rect);
 		gNivel.render(ifx, ify);
 		gPlayer.render();
 		dullEnemy.render();
 
 		SDL_RenderPresent(gRenderer);
+
+		fpsMili = 1000 / FPS;
+
+		SDL_Delay(fpsMili - deltaTime);
 		//------------------------------
 	}
 }
