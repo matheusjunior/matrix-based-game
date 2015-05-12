@@ -15,6 +15,8 @@
 // numero de quadrados apresentados na tela
 #define LIMX			18
 
+#define LIMY	        13
+
 // tamanho da tela
 #define SIZEX			(LIMX*PASSO)
 #define SIZEY			(DIMY*PASSO)

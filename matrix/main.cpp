@@ -24,6 +24,7 @@
 #include <sstream>
 #include <time.h>
 
+
 #include "Text.h"
 #include "Collision.h"
 #include "Util.h"
@@ -33,11 +34,12 @@
 #include "Physics.h"
 #include "Sprite.h"
 
+using namespace std;
 
 SDL_Window   *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
-using namespace std;
+
 
 void rotatePoint(float vx, float vy, float cx, float cy, float theta, float *xn, float *yn) {
 	*xn = cx + (vx - cx)*cos(theta) + (vy - cy)*sin(theta);
@@ -101,6 +103,21 @@ int main(int argc, char *args[])
 	bool colorGNeg = false;
 	int contadorGeral = 0;
 
+	int currentLevel = 0;
+	bool wasInThePortal = false;
+
+	SDL_Event event;
+	const Uint8 *keyboard_state;
+
+	Text score;
+
+	if (!init()) exit(1);
+
+	Nivel gNivel(gRenderer);
+	Sprite gPlayer(gRenderer);
+	Sprite dullEnemy(gRenderer);
+	SDL_Color white;
+
 #ifdef _WIN32
 	if (!GetCurrentDir(currentPath, sizeof(currentPath)))
 	{
@@ -108,26 +125,35 @@ int main(int argc, char *args[])
 	}
 	currentPath[sizeof(currentPath) - 1] = '\0'; /* not really required */
 #else
-	if (getcwd((char *) &currentPath, sizeof(currentPath)) == NULL)
+	if (getcwd((char *)&currentPath, sizeof(currentPath)) == NULL)
 	{
 		cout << "Error while getting current dir" << endl;
 	}
 #endif
 	printf("The current working directory is %s\n", currentPath);
 
-	int a = 0;
-	int i, j;
-	int currentLevel = 0;
-	bool wasInThePortal = false;
+	score.font = TTF_OpenFont("media/emulogic.ttf", 20);
 
-	SDL_Event event;
-	const Uint8 *keyboard_state;
+	white.r = 40;
+	white.g = 40;
+	white.b = 255;
 
-	if (!init()) exit(1);
+	score.color = white;
+	score.rect.x = SIZEX - 60;
+	score.rect.y = 20;
+	score.rect.w = 80;
+	score.rect.h = 25;
+	score.displayText = "Test";
 
-	Nivel gNivel(gRenderer);
-	Sprite gPlayer(gRenderer);
-	Sprite dullEnemy(gRenderer);
+	cout << score.font;
+
+	if (score.font == NULL)
+	{
+		std::cout << "Error: font " << TTF_GetError() << endl;
+		return -1;
+	}
+
+
 
 	srand(time(NULL));
 	if (!gPlayer.loadFromFile("media/ship.png", 1)) {
@@ -177,7 +203,7 @@ int main(int argc, char *args[])
 		gPlayer.previousX = gPlayer.x;
 		gPlayer.previousY = gPlayer.y;
 
-		while (SDL_PollEvent(&event)){
+		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_KEYDOWN)		{
 				switch (event.key.keysym.sym){
 				case SDLK_RIGHT:
@@ -208,13 +234,13 @@ int main(int argc, char *args[])
 		dullEnemy.previousX = dullEnemy.x;
 		dullEnemy.previousY = dullEnemy.y;
 
-		
-		if (gPlayer.y == LIMX) {
+
+		if (gPlayer.y == LIMY) {
 			++ify;
-			gPlayer.y = LIMX - 1;
+			gPlayer.y = LIMY - 1;
 		}
 		if (gPlayer.y < 0) {
-			--ify;
+			ify = 0;
 			gPlayer.y = 0;
 		}
 		if (gPlayer.x == LIMX) {
@@ -270,11 +296,25 @@ int main(int argc, char *args[])
 			colorG++;
 		}
 
+		if (score.font == NULL) {
+			score.font = TTF_OpenFont("media/emulogic.ttf", 20);
+			score.displayText = "hello";
+			score.color = white;
+			score.rect.x = SIZEX;
+			score.rect.y = 20;
+			score.rect.w = 80;
+			score.rect.h = 25;
+		}
+
+
+		score.surface = TTF_RenderText_Solid(score.font, score.displayText.c_str(), white);
+		score.texture = SDL_CreateTextureFromSurface(gRenderer, score.surface);
 
 		SDL_SetRenderDrawColor(gRenderer, colorG, colorG, colorG, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		gNivel.render(ifx);
+		SDL_RenderCopy(gRenderer, score.texture, NULL, &score.rect);
+		gNivel.render(ifx, ify);
 		gPlayer.render();
 		dullEnemy.render();
 

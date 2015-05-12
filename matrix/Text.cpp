@@ -14,3 +14,21 @@ Text::Text()
     texture = NULL;
     displayText = "";
 }
+
+Text* Text::loadFontAndSetPositionRef(int px, int py, int w, int h) {
+	Text* text = new Text();
+	text->font = TTF_OpenFont("media/emulogic.ttf", 20);
+
+	text->rect.x = px;
+	text->rect.y = py;
+	text->rect.w = w;
+	text->rect.h = h;
+	text->displayText = "Test";
+	return text;
+}
+
+Text Text::loadFontAndSetPosition(int px, int py, int w, int h) {
+	Text text;
+	
+	return text;
+}
