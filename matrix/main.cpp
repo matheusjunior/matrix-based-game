@@ -424,6 +424,8 @@ int main(int argc, char *args[])
 		
 		gNivel.render(ifx, ify);
 		gPlayer.render();
+
+
 		dullEnemy.render();
 
 		SDL_RenderPresent(gRenderer);

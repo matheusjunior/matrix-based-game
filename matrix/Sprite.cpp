@@ -88,24 +88,39 @@ void Sprite::free()
 
 
 
-void Sprite::viewPossibleMove() {
+void Sprite::viewPossibleMove(bool showOnlyPossibleMoves) {
 	
-	// up
-	SDL_SetRenderDrawColor(_gRenderer, 255, 255, 0, 255);
-	
-	SDL_Rect renderQuad = { (x-1) * PASSO, y * PASSO, _Width, _Height };
-	++_frame;
 
-	if (_gRenderer == NULL) {
-		std::cout << "erro";
+	if (showOnlyPossibleMoves) {
+		// left
+		SDL_SetRenderDrawColor(_gRenderer, 255, 255, 0, 0);
+		SDL_Rect renderQuad = { (x - 1) * PASSO, y * PASSO, _Width, _Height };
+
+		if (_gRenderer == NULL) std::cout << "erro";
+
+		SDL_RenderFillRect(_gRenderer, &renderQuad);
+
+
+		// right
+		renderQuad = { (x + 1) * PASSO, y * PASSO, _Width, _Height };
+		SDL_RenderFillRect(_gRenderer, &renderQuad);
+
+		// up
+		renderQuad = { x * PASSO, (y - 1) * PASSO, _Width, _Height };
+		SDL_RenderFillRect(_gRenderer, &renderQuad);
+
+		// down
+		renderQuad = { x * PASSO, (y + 1) * PASSO, _Width, _Height };
+		SDL_RenderFillRect(_gRenderer, &renderQuad);
+	} else {
+
 	}
-	SDL_RenderFillRect(_gRenderer, &renderQuad);
-	
-	//SDL_RenderCopyEx(_gRenderer, _Texture, NULL, &renderQuad, _alpha * 57, NULL, SDL_FLIP_NONE);
 }
 
 void Sprite::render()
 {
+
+	viewPossibleMove(true);
 	SDL_Rect renderQuad = { x * PASSO, y * PASSO, _Width, _Height };
 	++_frame;
 
