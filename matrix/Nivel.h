@@ -139,12 +139,12 @@ public:
 		SDL_Texture *texture = NULL;
 		bool isSprite = false;
 
-
-		if (surfacesNotLoaded()) {
+        /// \bug bad access exception if commented out
+//		if (surfacesNotLoaded()) {
 			surf_ratoeira = IMG_Load("media/ratoeira.jpg");
 			surf_poison = IMG_Load("media/poison.png");
 			surf_cenoura = IMG_Load("media/cenoura.png");
-		}
+//		}
 
 
 

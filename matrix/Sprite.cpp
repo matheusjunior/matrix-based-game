@@ -77,7 +77,6 @@ bool Sprite::loadFromFile(std::string path, int n)
 
 void Sprite::free()
 {
-
 	if (_Texture != NULL) {
 		SDL_DestroyTexture(_Texture);
 		_Texture = NULL;
@@ -86,8 +85,36 @@ void Sprite::free()
 	}
 }
 
+void Sprite::viewPossibleMove(bool showOnlyPossibleMoves) {
+	if (!showOnlyPossibleMoves) {
+		// left
+		SDL_SetRenderDrawColor(_gRenderer, 255, 255, 0, 150);
+		SDL_Rect renderQuad = { (x - 1) * PASSO, y * PASSO, _Width, _Height };
+
+		if (_gRenderer == NULL) std::cout << "erro";
+
+		SDL_RenderFillRect(_gRenderer, &renderQuad);
+
+		// right
+		renderQuad = { (x + 1) * PASSO, y * PASSO, _Width, _Height };
+		SDL_RenderFillRect(_gRenderer, &renderQuad);
+
+		// up
+		renderQuad = { x * PASSO, (y - 1) * PASSO, _Width, _Height };
+		SDL_RenderFillRect(_gRenderer, &renderQuad);
+
+		// down
+		renderQuad = { x * PASSO, (y + 1) * PASSO, _Width, _Height };
+		SDL_RenderFillRect(_gRenderer, &renderQuad);
+	} else {
+
+	}
+}
+
 void Sprite::render()
 {
+	viewPossibleMove(true);
+    seeStraightLine(3);
 	SDL_Rect renderQuad = { x * PASSO, y * PASSO, _Width, _Height };
 	++_frame;
 
@@ -148,4 +175,25 @@ bool Sprite::isValidMove(int matrix[DIMY][DIMX]) {
 	*/
 
 	return true;
+}
+
+void Sprite::seeStraightLine(int squares)
+{
+    SDL_SetRenderDrawColor(_gRenderer, 255, 255, 0, 150);
+    SDL_Rect renderQuad;
+
+    for(int i = 1; i <= squares; i++) {
+        renderQuad = { (x + i) * PASSO, y * PASSO, _Width, _Height };
+        SDL_RenderFillRect(_gRenderer, &renderQuad);
+    }
+}
+
+void Sprite::shoot()
+{
+    SDL_SetRenderDrawColor(_gRenderer, 255, 255, 0, 150);
+    SDL_Rect renderQuad;
+    std::cout << bulletPos << std::endl;
+    if (++bulletPos == LIMX) bulletPos = x+1;
+    if (bulletPos != -1) renderQuad = { (x + bulletPos) * PASSO, y * PASSO, _Width, _Height };
+    SDL_RenderFillRect(_gRenderer, &renderQuad);
 }

@@ -39,6 +39,32 @@ using namespace std;
 SDL_Window   *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
+void gameOver(Text tGameOverMsg) {
+
+	SDL_Color tGameOverColor;
+
+	tGameOverColor.r = 255;
+	tGameOverColor.g = 150;
+	tGameOverColor.b = 0;
+
+	if (tGameOverMsg.font == NULL) {
+		tGameOverMsg.font = TTF_OpenFont("media/emulogic.ttf", 20);
+		tGameOverMsg.displayText = "GAME OVER";
+		tGameOverMsg.color = tGameOverColor;
+		tGameOverMsg.rect.x = SIZEX;
+		tGameOverMsg.rect.y = 200;
+		tGameOverMsg.rect.w = 150;
+		tGameOverMsg.rect.h = 25;
+	}
+
+	tGameOverMsg.surface = TTF_RenderText_Solid(tGameOverMsg.font, tGameOverMsg.displayText.c_str(), tGameOverColor);
+	tGameOverMsg.texture = SDL_CreateTextureFromSurface(gRenderer, tGameOverMsg.surface);
+
+
+	SDL_RenderClear(gRenderer);
+
+	SDL_RenderCopy(gRenderer, tGameOverMsg.texture, NULL, &tGameOverMsg.rect);	
+}
 
 
 void rotatePoint(float vx, float vy, float cx, float cy, float theta, float *xn, float *yn) {
@@ -110,8 +136,10 @@ int main(int argc, char *args[])
 	const Uint8 *keyboard_state;
 
 	Text tScore;
-	Text tFrames;
+	Text tFrames1;
+	Text tFrames2;
 	Text tLifes;
+	Text tGameOverMsg;
 
 	int lastFrameTime = 0;
 	int  currentFrameTime = 0;
@@ -142,10 +170,11 @@ int main(int argc, char *args[])
 	printf("The current working directory is %s\n", currentPath);
 
 	tScore.font = TTF_OpenFont("media/emulogic.ttf", 20);
-	tFrames.font = TTF_OpenFont("media/emulogic.ttf", 20);
+	tFrames1.font = TTF_OpenFont("media/emulogic.ttf", 20);
+	tFrames2.font = TTF_OpenFont("media/emulogic.ttf", 20);
 	tLifes.font = TTF_OpenFont("media/emulogic.ttf", 20);
 
-	colorBlue.r = 40;
+	colorBlue.r = 255;
 	colorBlue.g = 40;
 	colorBlue.b = 255;
 
@@ -158,7 +187,7 @@ int main(int argc, char *args[])
 
 	cout << tScore.font;
 
-	if (tScore.font == NULL || tFrames.font == NULL)
+	if (tScore.font == NULL || tFrames1.font == NULL)
 	{
 		std::cout << "Error: font " << TTF_GetError() << endl;
 		return -1;
@@ -283,7 +312,9 @@ int main(int argc, char *args[])
 		case RATOEIRA:
 			gPlayer.lifes--;
 			gNivel.matriz[gPlayer.y + ifx][gPlayer.x + ifx] = VAZIO;
-			if (gPlayer.lifes == 0) exit(0);
+			if (gPlayer.lifes == 0) {
+				gameOver(tGameOverMsg);
+			}
 		case CENOURA:
 			gPlayer.lifes++;
 			gNivel.matriz[gPlayer.y + ifx][gPlayer.x + ifx] = VAZIO;
@@ -302,7 +333,8 @@ int main(int argc, char *args[])
 		std::stringstream cont;
 		cont << contadorGeral;
 
-		tFrames.displayText = "Frames: " + cont.str();
+		tFrames1.displayText = "Frames: ";
+		tFrames2.displayText = cont.str();
 
 		std::stringstream lifesSTR;
 		lifesSTR << gPlayer.lifes;
@@ -321,12 +353,14 @@ int main(int argc, char *args[])
 
 		if (colorGNeg) {
 			colorG--;
+			colorBlue.r++;
 			if (colorG == 0) {
 				colorGNeg = false;
 			}
 		}
 		else {
 			colorG++;
+			colorBlue.r--;
 		}
 
 		if (tScore.font == NULL) {
@@ -339,14 +373,23 @@ int main(int argc, char *args[])
 			tScore.rect.h = 25;
 		}
 
-		if (tFrames.font == NULL) {
-			tFrames.font = TTF_OpenFont("media/emulogic.ttf", 20);
-			tFrames.displayText = "Frames: ";
-			tFrames.color = colorBlue;
-			tFrames.rect.x = SIZEX;
-			tFrames.rect.y = 50;
-			tFrames.rect.w = 150;
-			tFrames.rect.h = 25;
+		if (tFrames1.font == NULL) {
+			tFrames1.font = TTF_OpenFont("media/emulogic.ttf", 20);
+			tFrames1.displayText = "Frames: ";
+			tFrames1.color = colorBlue;
+			tFrames1.rect.x = SIZEX;
+			tFrames1.rect.y = 50;
+			tFrames1.rect.w = 150;
+			tFrames1.rect.h = 25;
+		}
+
+		if (tFrames2.font == NULL) {
+			tFrames2.font = TTF_OpenFont("media/emulogic.ttf", 20);
+			tFrames2.color = colorBlue;
+			tFrames2.rect.x = SIZEX + 150;
+			tFrames2.rect.y = 50;
+			tFrames2.rect.w = 30;
+			tFrames2.rect.h = 25;
 		}
 
 		if (tLifes.font == NULL) {
@@ -362,8 +405,11 @@ int main(int argc, char *args[])
 		tScore.surface = TTF_RenderText_Solid(tScore.font, tScore.displayText.c_str(), colorBlue);
 		tScore.texture = SDL_CreateTextureFromSurface(gRenderer, tScore.surface);
 
-		tFrames.surface = TTF_RenderText_Solid(tFrames.font, tFrames.displayText.c_str(), colorBlue);
-		tFrames.texture = SDL_CreateTextureFromSurface(gRenderer, tFrames.surface);
+		tFrames1.surface = TTF_RenderText_Solid(tFrames1.font, tFrames1.displayText.c_str(), colorBlue);
+		tFrames1.texture = SDL_CreateTextureFromSurface(gRenderer, tFrames1.surface);
+
+		tFrames2.surface = TTF_RenderText_Solid(tFrames2.font, tFrames2.displayText.c_str(), colorBlue);
+		tFrames2.texture = SDL_CreateTextureFromSurface(gRenderer, tFrames2.surface);
 
 		tLifes.surface = TTF_RenderText_Solid(tLifes.font, tLifes.displayText.c_str(), colorBlue);
 		tLifes.texture = SDL_CreateTextureFromSurface(gRenderer, tLifes.surface);
@@ -372,10 +418,13 @@ int main(int argc, char *args[])
 		SDL_RenderClear(gRenderer);
 
 		SDL_RenderCopy(gRenderer, tScore.texture, NULL, &tScore.rect);
-		SDL_RenderCopy(gRenderer, tFrames.texture, NULL, &tFrames.rect);
+		SDL_RenderCopy(gRenderer, tFrames1.texture, NULL, &tFrames1.rect);
+		SDL_RenderCopy(gRenderer, tFrames2.texture, NULL, &tFrames2.rect);
 		SDL_RenderCopy(gRenderer, tLifes.texture, NULL, &tLifes.rect);
+		
 		gNivel.render(ifx, ify);
 		gPlayer.render();
+        gPlayer.shoot();
 		dullEnemy.render();
 
 		SDL_RenderPresent(gRenderer);

@@ -19,6 +19,7 @@
 class Sprite {
 public:
     uint16_t lifes;
+    int bulletPos;
     float intoxication;
 	Physics phi;
 	SDL_Renderer* _gRenderer;
@@ -30,7 +31,7 @@ public:
 	float _step = 1;
 	void setStep(int n) { _step = n; };
 
-	Sprite() { _Texture = NULL; _Width = 0; _Height = 0; lifes = 1;};
+	Sprite() { _Texture = NULL; _Width = 0; _Height = 0; lifes = 1; bulletPos = x+1;};
 
 	Sprite(SDL_Renderer *rend) { 
 		_Texture = NULL; 
@@ -38,9 +39,9 @@ public:
 		_Height = 0; 
 	    _gRenderer = rend;
         lifes = 1;
+        bulletPos = x+1;
 		previousX = 0;
 		previousY = 0;
-
 	};
 	
 	~Sprite() { free(); };
@@ -65,6 +66,12 @@ public:
 	void jump();
 
 	bool isValidMove(int matrix[DIMY][DIMX]);
+
+	void viewPossibleMove(bool);
+
+    void seeStraightLine(int squares);
+
+    void shoot();
 };
 
 
