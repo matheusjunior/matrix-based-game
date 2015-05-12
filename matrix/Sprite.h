@@ -14,6 +14,7 @@
 
 #include "Vector2d.h"
 #include "Physics.h"
+#include "Consts.h"
 
 class Sprite {
 public:
@@ -22,6 +23,7 @@ public:
 	Physics phi;
 	SDL_Renderer* _gRenderer;
 	int x, y, _alpha, _sx, _sy, _cx, _cy;
+	int previousX, previousY;
 	float ax0, ay0, ax1, ay1, ax2, ay2, ax3, ay3;
 	SDL_Texture *_Texture;
 	int _Width, _Height, _frame, _nframes;
@@ -36,6 +38,9 @@ public:
 		_Height = 0; 
 	    _gRenderer = rend;
         lifes = 1;
+		previousX = 0;
+		previousY = 0;
+
 	};
 	
 	~Sprite() { free(); };
@@ -58,6 +63,8 @@ public:
     void moveRandom();
 
 	void jump();
+
+	bool isValidMove(int matrix[DIMY][DIMX]);
 };
 
 
