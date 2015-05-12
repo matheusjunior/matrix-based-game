@@ -65,6 +65,8 @@ public:
 	void jump();
 
 	bool isValidMove(int matrix[DIMY][DIMX]);
+
+	void viewPossibleMove();
 };
 
 
