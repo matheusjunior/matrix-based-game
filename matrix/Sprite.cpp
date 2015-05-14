@@ -320,7 +320,6 @@ void Sprite::viewPossibleMove(bool showOnlyPossibleMoves) {
 
 void Sprite::render()
 {
-
 	viewPossibleMove(true);
 	SDL_Rect renderQuad = { x * PASSO, y * PASSO, _Width, _Height };
 	++_frame;
