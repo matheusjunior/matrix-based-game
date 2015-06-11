@@ -38,6 +38,10 @@ public:
     std::string displayText;
 
     Text();
+
+	Text* loadFontAndSetPositionRef(int px, int py, int w, int h);
+
+	static Text loadFontAndSetPosition(int px, int py, int w, int h);
 };
 
 
